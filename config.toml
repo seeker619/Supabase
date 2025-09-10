@@ -1,0 +1,4 @@
+project_id = "xhfmqslbujyrxkpdddis"
+
+[functions.memory_direct]
+verify_jwt = false
