@@ -1,4 +1,19 @@
 project_id = "xhfmqslbujyrxkpdddis"
 
+[functions.memory]
+verify_jwt = false
+
+[functions.memory_by_tags]
+verify_jwt = false
+
+[functions.memory_count_by_tag]
+verify_jwt = false
+
 [functions.memory_direct]
+verify_jwt = false
+
+[functions.memory_recent_per_tag]
+verify_jwt = false
+
+[functions.memory_search]
 verify_jwt = false
