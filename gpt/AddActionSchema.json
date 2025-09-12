@@ -1,408 +1,158 @@
-{
-  "openapi": "3.1.0",
-  "info": {
-    "title": "Frankie Memory API (Supabase Edge Functions)",
-    "version": "1.1.0"
-  },
-  "servers": [
-    {
-      "url": "https://cmxpgcizhhhxvogyhpmp.supabase.co/functions/v1/frankie"
-    }
-  ],
-  "components": {
-    "securitySchemes": {
-      "bearerAuth": {
-        "type": "http",
-        "scheme": "bearer"
-      }
-    }
-  },
-  "security": [
-    {
-      "bearerAuth": []
-    }
-  ],
-  "paths": {
-    "/memory": {
-      "post": {
-        "operationId": "frankie_store_memory",
-        "summary": "Store a memory entry",
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/MemoryInput"
-              }
-            }
-          }
-        },
-        "responses": {
-          "200": {
-            "description": "Success",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/MemoryEntry"
-                }
-              }
-            }
-          }
-        }
-      },
-      "get": {
-        "operationId": "frankie_retrieve_memory",
-        "summary": "Retrieve memory entries",
-        "parameters": [
-          {
-            "in": "query",
-            "name": "memory_content",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "in": "query",
-            "name": "tags",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "in": "query",
-            "name": "protocol",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "in": "query",
-            "name": "limit",
-            "schema": {
-              "type": "integer"
-            }
-          },
-          {
-            "in": "query",
-            "name": "offset",
-            "schema": {
-              "type": "integer"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "List of memories",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/MemoryEntry"
-                  }
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/memory_direct": {
-      "post": {
-        "operationId": "frankie_store_memory_direct",
-        "summary": "Store a memory entry (trusted insert)",
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/MemoryInput"
-              }
-            }
-          }
-        },
-        "responses": {
-          "200": {
-            "description": "Success"
-          }
-        }
-      }
-    },
-    "/memory_by_tags": {
-      "get": {
-        "operationId": "frankie_filter_by_tags",
-        "summary": "Get memories by tags",
-        "parameters": [
-          {
-            "in": "query",
-            "name": "tags",
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "List of memories",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/MemoryEntry"
-                  }
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/memory_search": {
-      "get": {
-        "operationId": "frankie_search_memory_content",
-        "summary": "Full-text search memory content",
-        "parameters": [
-          {
-            "in": "query",
-            "name": "q",
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Search results",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/MemoryEntry"
-                  }
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/memory_fuzzy": {
-      "get": {
-        "operationId": "frankie_fuzzy_search",
-        "summary": "Fuzzy search memory content",
-        "parameters": [
-          {
-            "in": "query",
-            "name": "q",
-            "schema": {
-              "type": "string"
-            },
-            "required": true
-          },
-          {
-            "in": "query",
-            "name": "threshold",
-            "schema": {
-              "type": "number",
-              "default": 0.3
-            }
-          },
-          {
-            "in": "query",
-            "name": "limit",
-            "schema": {
-              "type": "integer",
-              "default": 10
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "List of memories",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/MemoryEntry"
-                  }
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/memory_recent_per_tag": {
-      "get": {
-        "operationId": "frankie_recent_per_tag",
-        "summary": "Most recent memory per tag",
-        "responses": {
-          "200": {
-            "description": "List of recent memories per tag",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/RecentPerTag"
-                  }
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/memory_semantic": {
-      "get": {
-        "operationId": "frankie_semantic_search",
-        "summary": "Semantic search memories",
-        "parameters": [
-          {
-            "in": "query",
-            "name": "query",
-            "schema": {
-              "type": "string"
-            },
-            "required": true
-          },
-          {
-            "in": "query",
-            "name": "threshold",
-            "schema": {
-              "type": "number",
-              "default": 0.5
-            }
-          },
-          {
-            "in": "query",
-            "name": "count",
-            "schema": {
-              "type": "integer",
-              "default": 10
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "List of memories",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/MemoryEntry"
-                  }
-                }
-              }
-            }
-          }
-        }
-      }
-    }
-  },
-  "components": {
-    "schemas": {
-      "MemoryInput": {
-        "type": "object",
-        "required": [
-          "memory_content",
-          "tags"
-        ],
-        "properties": {
-          "memory_content": {
-            "type": "string"
-          },
-          "tags": {
-            "type": "array",
-            "items": {
-              "type": "string"
-            }
-          },
-          "protocol": {
-            "type": "string"
-          },
-          "embedding": {
-            "type": "array",
-            "items": {
-              "type": "number"
-            }
-          }
-        }
-      },
-      "MemoryEntry": {
-        "type": "object",
-        "properties": {
-          "id": {
-            "type": "integer"
-          },
-          "created_at": {
-            "type": "string",
-            "format": "date-time"
-          },
-          "updated_at": {
-            "type": "string",
-            "format": "date-time"
-          },
-          "memory_content": {
-            "type": "string"
-          },
-          "tags": {
-            "type": "array",
-            "items": {
-              "type": "string"
-            }
-          },
-          "protocol": {
-            "type": "string"
-          },
-          "tags_flat": {
-            "type": "string"
-          },
-          "content_tsv": {
-            "type": "string"
-          },
-          "embedding": {
-            "type": "array",
-            "items": {
-              "type": "number"
-            },
-            "description": "Vector embedding (1536-dim) for semantic search"
-          },
-          "similarity": {
-            "type": "number"
-          },
-          "distance": {
-            "type": "number"
-          }
-        }
-      },
-      "RecentPerTag": {
-        "type": "object",
-        "properties": {
-          "tag": {
-            "type": "string"
-          },
-          "id": {
-            "type": "integer"
-          },
-          "memory_content": {
-            "type": "string"
-          },
-          "tags": {
-            "type": "array",
-            "items": {
-              "type": "string"
-            }
-          },
-          "protocol": {
-            "type": "string"
-          }
-        }
-      }
-    }
-  }
-}
+openapi: 3.1.0
+info:
+  title: Soul Memory API (JSONB/BIGINT)
+  version: 2.1.1
+servers:
+  - url: https://xhfmqslbujyrxkpdddis.supabase.co/functions/v1
+
+paths:
+  /memory:
+    post:
+      operationId: store_memory
+      summary: Store a new memory entry
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/MemoryEntryInput"
+      responses:
+        "200":
+          description: Memory stored
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MemoryEntry"
+    get:
+      operationId: retrieve_memory
+      summary: Retrieve memory entries
+      parameters:
+        - { name: memory_content, in: query, schema: { type: string } }
+        - { name: tags, in: query, schema: { type: string, description: "cs.{A,B} or ov.{A,B}" } }
+        - { name: protocol, in: query, schema: { type: string } }
+        - { name: limit, in: query, schema: { type: integer, default: 50 } }
+        - { name: offset, in: query, schema: { type: integer, default: 0 } }
+      responses:
+        "200":
+          description: Memory list
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/MemoryEntry"
+
+  /memory_direct:
+    post:
+      operationId: store_memory_direct
+      summary: Trusted insert (token in body)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [memory_content, tags, protocol, trusted, trusted_token]
+              properties:
+                memory_content: { type: string }
+                tags: { type: array, items: { type: string } }
+                protocol: { type: string }
+                trusted: { type: boolean, enum: [true] }
+                trusted_token: { type: string }
+      responses:
+        "200": { description: OK }
+        "403": { description: Forbidden }
+
+  /memory_count_by_tag:
+    get:
+      operationId: count_memories_by_tag
+      summary: Count entries by a tag
+      parameters:
+        - { name: tag, in: query, required: true, schema: { type: string } }
+      responses:
+        "200":
+          description: Count
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  tag: { type: string }
+                  count: { type: integer }
+
+  /memory_recent_per_tag:
+    get:
+      operationId: get_recent_memories_per_tag
+      summary: Most recent memory per tag
+      responses:
+        "200":
+          description: List
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    tag: { type: string }
+                    id: { type: integer }
+                    memory_content: { type: string }
+                    tags: { type: array, items: { type: string } }
+                    protocol: { type: string }
+
+  /memory_search:
+    get:
+      operationId: search_memory_content
+      summary: Full‑text search
+      parameters:
+        - { name: q, in: query, required: true, schema: { type: string } }
+      responses:
+        "200":
+          description: List
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/MemoryEntry"
+
+  /memory_by_tags:
+    get:
+      operationId: filter_by_tags
+      summary: Get memories with ANY of the tags
+      parameters:
+        - { name: tags, in: query, required: true, schema: { type: string, description: "comma-separated" } }
+      responses:
+        "200":
+          description: List
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/MemoryEntry"
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+  schemas:
+    MemoryEntryInput:
+      type: object
+      required: [memory_content, tags]
+      properties:
+        memory_content: { type: string }
+        tags: { type: array, items: { type: string } }
+        protocol: { type: string }
+    MemoryEntry:
+      type: object
+      properties:
+        id: { type: integer }
+        memory_content: { type: string }
+        tags: { type: array, items: { type: string } }
+        protocol: { type: string }
+
+security:
+  - bearerAuth: []
