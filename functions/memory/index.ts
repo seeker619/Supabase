@@ -1,45 +1,40 @@
 import { serve } from "https://deno.land/std@0.224.0/http/server.ts";
-import { adminClient, ok, bad, parseTagFilter } from "../_shared/mod.ts";
+import { adminClient, ok, bad } from "../_shared/mod.ts";
 serve(async (req)=>{
-  const supabase = adminClient();
   if (req.method === "POST") {
-    const body = await req.json().catch(()=>null);
+    let body;
+    try {
+      body = await req.json();
+    } catch  {
+      return bad("Invalid JSON body");
+    }
     if (!body?.memory_content || !Array.isArray(body.tags) || body.tags.length === 0) {
       return bad("memory_content and tags[] are required");
     }
+    const supabase = adminClient();
     const { data, error } = await supabase.from("memories").insert({
       memory_content: body.memory_content,
       tags: body.tags,
-      protocol: body.protocol ?? null
-    }).select().single();
+      protocol: body.protocol ?? "note"
+    }).select("id").single();
     if (error) return bad(error.message, 500);
-    return ok(data);
+    return ok({
+      status: "ok",
+      id: data.id
+    });
   }
   if (req.method === "GET") {
     const url = new URL(req.url);
-    const memory_content = url.searchParams.get("memory_content") ?? undefined;
-    const tags = url.searchParams.get("tags") ?? undefined;
-    const protocol = url.searchParams.get("protocol") ?? undefined;
-    const limit = Number(url.searchParams.get("limit") ?? "50");
-    const offset = Number(url.searchParams.get("offset") ?? "0");
-    let q = supabase.from("memories").select("*").order("id", {
+    const supabase = adminClient();
+    let query = supabase.from("memories").select("*").order("id", {
       ascending: false
-    }) // bigint identity
-    .range(offset, offset + limit - 1);
-    if (protocol) q = q.eq("protocol", protocol);
-    if (memory_content) q = q.ilike("memory_content", `%${memory_content}%`);
-    const tf = parseTagFilter(tags);
-    if (tf) {
-      if (tf.mode === "cs") {
-        // contains ALL tags
-        q = q.contains("tags", tf.list);
-      } else {
-        // overlaps ANY: OR across tags.cs
-        const ors = tf.list.map((t)=>`tags.cs.{${t}}`).join(",");
-        q = q.or(ors);
-      }
-    }
-    const { data, error } = await q;
+    });
+    if (url.searchParams.get("memory_content")) query = query.ilike("memory_content", `%${url.searchParams.get("memory_content")}%`);
+    if (url.searchParams.get("tags")) query = query.filter("tags", "cs", `{${url.searchParams.get("tags")}}`);
+    if (url.searchParams.get("protocol")) query = query.eq("protocol", url.searchParams.get("protocol"));
+    if (url.searchParams.get("limit")) query = query.limit(Number(url.searchParams.get("limit")));
+    if (url.searchParams.get("offset")) query = query.range(Number(url.searchParams.get("offset")), Number(url.searchParams.get("offset")) + Number(url.searchParams.get("limit")) - 1);
+    const { data, error } = await query;
     if (error) return bad(error.message, 500);
     return ok(data ?? []);
   }
